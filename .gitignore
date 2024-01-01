@@ -1,0 +1,6 @@
+# Ignored folders
+.build/
+
+# Ignored files
+*.DS_Store
+*.zip
