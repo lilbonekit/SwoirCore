@@ -10,6 +10,7 @@ public enum SwoirBackendError: Error, Equatable {
     case emptyWitnessMap
     case emptyProofData
     case emptyVerificationKey
+    case emptyProofType
 }
 
 public struct Proof {
@@ -23,6 +24,6 @@ public struct Proof {
 }
 
 public protocol SwoirBackendProtocol {
-    static func prove(bytecode: Data, witnessMap: [Int64]) throws -> Proof
-    static func verify(bytecode: Data, proof: Proof) throws -> Bool
+    static func prove(bytecode: Data, witnessMap: [Int64], proof_type: String) throws -> Proof
+    static func verify(bytecode: Data, proof: Proof, proof_type: String) throws -> Bool
 }
