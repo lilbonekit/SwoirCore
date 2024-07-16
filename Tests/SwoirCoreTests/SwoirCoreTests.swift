@@ -4,13 +4,13 @@ import XCTest
 final class SwoirCoreTests: XCTestCase {
 
     class MockSwoirBackend: SwoirBackendProtocol {
-        static func prove(bytecode: Data, witnessMap: [Int64], proof_type: String) throws -> Proof {
+        static func prove(bytecode: Data, witnessMap: [Int64], proof_type: String, srs_path: String? = nil) throws -> Proof {
             if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
             if witnessMap.isEmpty { throw SwoirBackendError.emptyWitnessMap }
             if proof_type.isEmpty { throw SwoirBackendError.emptyProofType }
             return Proof(proof: Data("foo".utf8), vkey: Data("bar".utf8))
         }
-        static func verify(bytecode: Data, proof: Proof, proof_type: String) throws -> Bool {
+        static func verify(bytecode: Data, proof: Proof, proof_type: String, srs_path: String? = nil) throws -> Bool {
             if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
             if proof.proof.isEmpty { throw SwoirBackendError.emptyProofData }
             if proof.vkey.isEmpty { throw SwoirBackendError.emptyVerificationKey }
