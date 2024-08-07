@@ -27,5 +27,5 @@ public struct Proof {
 public protocol SwoirBackendProtocol {
     static func setup_srs(bytecode: Data, srs_path: String?) throws -> UInt32
     static func prove(bytecode: Data, witnessMap: [Int64], proof_type: String, num_points: UInt32) throws -> Proof
-    static func verify(bytecode: Data, proof: Proof, proof_type: String, num_points: UInt32) throws -> Bool
+    static func verify(proof: Proof, proof_type: String, num_points: UInt32) throws -> Bool
 }
