@@ -9,7 +9,7 @@ final class SwoirCoreTests: XCTestCase {
             return 0
         }
 
-        static func prove(bytecode: Data, witnessMap: [Int64], proof_type: String, num_points: UInt32) throws -> Proof {
+        static func prove(bytecode: Data, witnessMap: [String], proof_type: String, num_points: UInt32) throws -> Proof {
             if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
             if witnessMap.isEmpty { throw SwoirBackendError.emptyWitnessMap }
             if proof_type.isEmpty { throw SwoirBackendError.emptyProofType }
@@ -25,9 +25,9 @@ final class SwoirCoreTests: XCTestCase {
 
     func testErrorCases() throws {
         let bytecode = Data([0x01])
-        let witnessMap = [Int64(1), Int64(2)]
+        let witnessMap = ["1", "2"]
         let emptyBytecode = Data()
-        let emptyWitnessMap = [Int64]()
+        let emptyWitnessMap = [String]()
         let proofEmptyProof = Proof(proof: Data(), vkey: Data([0x01]))
         let proofEmptyVKey = Proof(proof: Data([0x01]), vkey: Data())
 
