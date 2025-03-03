@@ -21,6 +21,12 @@ final class SwoirCoreTests: XCTestCase {
             if proof_type.isEmpty { throw SwoirBackendError.emptyProofType }
             return true
         }
+
+        static func execute(bytecode: Data, witnessMap: [String]) throws -> [String] {
+            if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
+            if witnessMap.isEmpty { throw SwoirBackendError.emptyWitnessMap }
+            return witnessMap
+        }
     }
 
     func testErrorCases() throws {
@@ -45,6 +51,12 @@ final class SwoirCoreTests: XCTestCase {
         }
         XCTAssertThrowsError(try MockSwoirBackend.prove(bytecode: bytecode, witnessMap: witnessMap, proof_type: "", recursive: false)) { error in
             XCTAssertEqual(error as? SwoirBackendError, .emptyProofType)
+        }
+        XCTAssertThrowsError(try MockSwoirBackend.execute(bytecode: emptyBytecode, witnessMap: witnessMap)) { error in
+            XCTAssertEqual(error as? SwoirBackendError, .emptyBytecode)
+        }
+        XCTAssertThrowsError(try MockSwoirBackend.execute(bytecode: bytecode, witnessMap: emptyWitnessMap)) { error in
+            XCTAssertEqual(error as? SwoirBackendError, .emptyWitnessMap)
         }
     }
 }
