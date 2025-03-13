@@ -4,20 +4,25 @@ import XCTest
 final class SwoirCoreTests: XCTestCase {
 
     class MockSwoirBackend: SwoirBackendProtocol {
-        static func setup_srs(bytecode: Data, srs_path: String? = nil, recursive: Bool) throws -> UInt32 {
+        static func setup_srs(circuit_size: UInt32, srs_path: String? = nil) throws -> UInt32 {
+            if circuit_size == 0 { throw SwoirBackendError.nonPositiveCircuitSize }
+            return 0
+        }
+
+        static func setup_srs_from_bytecode(bytecode: Data, srs_path: String? = nil, recursive: Bool) throws -> UInt32 {
             if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
             return 0
         }
 
-        static func prove(bytecode: Data, witnessMap: [String], proof_type: String, recursive: Bool) throws -> Proof {
+        static func prove(bytecode: Data, witnessMap: [String], proof_type: String, recursive: Bool) throws -> Data {
             if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
             if witnessMap.isEmpty { throw SwoirBackendError.emptyWitnessMap }
             if proof_type.isEmpty { throw SwoirBackendError.emptyProofType }
-            return Proof(proof: Data("foo".utf8), vkey: Data("bar".utf8))
+            return Data("foo".utf8)
         }
-        static func verify(proof: Proof, proof_type: String) throws -> Bool {
-            if proof.proof.isEmpty { throw SwoirBackendError.emptyProofData }
-            if proof.vkey.isEmpty { throw SwoirBackendError.emptyVerificationKey }
+        static func verify(proof: Data, vkey: Data, proof_type: String) throws -> Bool {
+            if proof.isEmpty { throw SwoirBackendError.emptyProofData }
+            if vkey.isEmpty { throw SwoirBackendError.emptyVerificationKey }
             if proof_type.isEmpty { throw SwoirBackendError.emptyProofType }
             return true
         }
@@ -27,6 +32,11 @@ final class SwoirCoreTests: XCTestCase {
             if witnessMap.isEmpty { throw SwoirBackendError.emptyWitnessMap }
             return witnessMap
         }
+
+        static func get_verification_key(bytecode: Data, recursive: Bool) throws -> Data {
+            if bytecode.isEmpty { throw SwoirBackendError.emptyBytecode }
+            return Data("bar".utf8)
+        }
     }
 
     func testErrorCases() throws {
@@ -34,8 +44,10 @@ final class SwoirCoreTests: XCTestCase {
         let witnessMap = ["1", "2"]
         let emptyBytecode = Data()
         let emptyWitnessMap = [String]()
-        let proofEmptyProof = Proof(proof: Data(), vkey: Data([0x01]))
-        let proofEmptyVKey = Proof(proof: Data([0x01]), vkey: Data())
+        let emptyProof = Data()
+        let emptyVKey = Data()
+        let nonEmptyProof = Data("foo".utf8)
+        let nonEmptyVKey = Data("bar".utf8)
 
         XCTAssertThrowsError(try MockSwoirBackend.prove(bytecode: emptyBytecode, witnessMap: witnessMap, proof_type: "honk", recursive: false)) { error in
             XCTAssertEqual(error as? SwoirBackendError, .emptyBytecode)
@@ -43,10 +55,10 @@ final class SwoirCoreTests: XCTestCase {
         XCTAssertThrowsError(try MockSwoirBackend.prove(bytecode: bytecode, witnessMap: emptyWitnessMap, proof_type: "honk", recursive: false)) { error in
             XCTAssertEqual(error as? SwoirBackendError, .emptyWitnessMap)
         }
-        XCTAssertThrowsError(try MockSwoirBackend.verify(proof: proofEmptyProof, proof_type: "honk")) { error in
+        XCTAssertThrowsError(try MockSwoirBackend.verify(proof: emptyProof, vkey: nonEmptyVKey, proof_type: "honk")) { error in
             XCTAssertEqual(error as? SwoirBackendError, .emptyProofData)
         }
-        XCTAssertThrowsError(try MockSwoirBackend.verify(proof: proofEmptyVKey, proof_type: "honk")) { error in
+        XCTAssertThrowsError(try MockSwoirBackend.verify(proof: nonEmptyProof, vkey: emptyVKey, proof_type: "honk")) { error in
             XCTAssertEqual(error as? SwoirBackendError, .emptyVerificationKey)
         }
         XCTAssertThrowsError(try MockSwoirBackend.prove(bytecode: bytecode, witnessMap: witnessMap, proof_type: "", recursive: false)) { error in
@@ -57,6 +69,15 @@ final class SwoirCoreTests: XCTestCase {
         }
         XCTAssertThrowsError(try MockSwoirBackend.execute(bytecode: bytecode, witnessMap: emptyWitnessMap)) { error in
             XCTAssertEqual(error as? SwoirBackendError, .emptyWitnessMap)
+        }
+        XCTAssertThrowsError(try MockSwoirBackend.setup_srs(circuit_size: 0)) { error in
+            XCTAssertEqual(error as? SwoirBackendError, .nonPositiveCircuitSize)
+        }
+        XCTAssertThrowsError(try MockSwoirBackend.setup_srs_from_bytecode(bytecode: emptyBytecode, recursive: false)) { error in
+            XCTAssertEqual(error as? SwoirBackendError, .emptyBytecode)
+        }
+        XCTAssertThrowsError(try MockSwoirBackend.get_verification_key(bytecode: emptyBytecode, recursive: false)) { error in
+            XCTAssertEqual(error as? SwoirBackendError, .emptyBytecode)
         }
     }
 }

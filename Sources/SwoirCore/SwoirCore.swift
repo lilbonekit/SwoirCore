@@ -13,21 +13,15 @@ public enum SwoirBackendError: Error, Equatable {
     case emptyVerificationKey
     case emptyProofType
     case errorSettingUpSRS
-}
-
-public struct Proof {
-    public let proof: Data
-    public let vkey: Data
-
-    public init(proof: Data, vkey: Data) {
-        self.proof = proof
-        self.vkey = vkey
-    }
+    case nonPositiveCircuitSize
+    case errorGettingVerificationKey
 }
 
 public protocol SwoirBackendProtocol {
-    static func setup_srs(bytecode: Data, srs_path: String?, recursive: Bool) throws -> UInt32
-    static func prove(bytecode: Data, witnessMap: [String], proof_type: String, recursive: Bool) throws -> Proof
-    static func verify(proof: Proof, proof_type: String) throws -> Bool
+    static func setup_srs(circuit_size: UInt32, srs_path: String?) throws -> UInt32
+    static func setup_srs_from_bytecode(bytecode: Data, srs_path: String?, recursive: Bool) throws -> UInt32
+    static func prove(bytecode: Data, witnessMap: [String], proof_type: String, recursive: Bool) throws -> Data
+    static func verify(proof: Data, vkey: Data, proof_type: String) throws -> Bool
     static func execute(bytecode: Data, witnessMap: [String]) throws -> [String]
+    static func get_verification_key(bytecode: Data, recursive: Bool) throws -> Data
 }
